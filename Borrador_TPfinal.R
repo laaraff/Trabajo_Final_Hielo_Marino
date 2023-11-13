@@ -78,11 +78,13 @@ write.table(tabla_davis, file= "datos_davis.txt", sep="  ", row.names = F)
 
 
 # ITEM D - Climatologia mensual para todo la region ----------------------
-#primero reemplazo la columna time solo por el mes
-datos_antartida_periodo$time <- month(datos_antartida_periodo$time)
-media_por_meses <- aggregate(datos_antartida_periodo$icec, list(datos_antartida_periodo$time), mean)
 
-colnames(media_por_meses) <- c("Mes", "Media")
+#primero reemplazo la columna time solo por el mes
+datos_antartida_periodo$mes <- month(datos_antartida_periodo$time)
+
+climatologia <- aggregate(datos_antartida_periodo$icec, list(datos_antartida_periodo$mes,datos_antartida_periodo$lat, datos_antartida_periodo$lon), mean)
+
+colnames(climatologia) <- c("Mes", "Latitud", "Longitud", "Climatologia mensual")
 
 #si lo quiero ordenar tengo que tener cuidado que no ordena las medias tmb
 
