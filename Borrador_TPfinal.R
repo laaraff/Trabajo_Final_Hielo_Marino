@@ -9,12 +9,13 @@ library(metR)
 library(lubridate)
 library(ggplot2)
 
-nc<-nc_open ("/home/clinux01/Escritorio/Lara/Trabajo_Final_Hielo_Marino/icec.sfc.mon.mean.nc") #LINUX
+#nc<-nc_open ("/home/clinux01/Escritorio/Lara/Trabajo_Final_Hielo_Marino/icec.sfc.mon.mean.nc") #LINUX
+nc<-nc_open ("/home/clinux01/Escritorio/Lara/Trabajo_Final/icec.sfc.mon.mean.nc") #LINUX COMPU JUEVES
 #nc <- nc_open("C:/Users/Usuario/Documents/Lara/Trabajo_Final_Hielo_Marino/icec.sfc.mon.mean.nc") #WINDOWS
 nc
 
 # WINDOWS archivo <- "C:/Users/Usuario/Documents/Lara/Trabajo_Final_Hielo_Marino/icec.sfc.mon.mean.nc"
-archivo <- "/home/clinux01/Escritorio/Lara/Trabajo_Final_Hielo_Marino/icec.sfc.mon.mean.nc"
+archivo <- "/home/clinux01/Escritorio/Lara/Trabajo_Final/icec.sfc.mon.mean.nc" #Ojo cambio nombre carpeta
 GlanceNetCDF(archivo)
 datos <- ReadNetCDF(archivo, vars = "icec")
 hist(datos$icec)
@@ -47,19 +48,28 @@ head(datos_esperanza_periodo)
 datos_davis_periodo <- datos_davis_totales[which(year(datos_davis_totales$time) %in% 1990:2019),]
 
 
-#c)
-#Para Esperanza
-
-
 #Pruebo con barras. Esperanza
 grafico <- ggplot(data= datos_esperanza_periodo, mapping= aes(x=time, y=icec)) +
-  geom_bar(stat="identity", color="#acd8fa") +
+  geom_bar(stat="identity", fill="#acd8fa") +
   labs(title= "Variación de la concentración del hielo marino Base Esperanza (Argentina)", subtitle= "Periodo 1990-2019", x= "Mes", y= "Hielo marino (%)")
 
 #Para Davis
 grafico1 <- ggplot(data= datos_davis_periodo, mapping= aes(x=time, y=icec)) +
-  geom_bar(stat="identity", color="#33a6ff") +
+  geom_bar(stat="identity", fill="#33a6ff") +
   labs(title= "Variación de la concentración del hielo marino Base Davis (Australia)", subtitle= "Periodo 1990-2019", x= "Mes", y= "Hielo marino (%)")
+
+
+#Hago una serie con un solo anio. Esperanza
+grafico <- ggplot(data= datos_esperanza_periodo[anio==2019], mapping= aes(x=time, y=icec)) +
+  geom_bar(stat="identity", fill="#bfacfa") +
+  labs(title= "Variación anual de la concentración del hielo marino Base Esperanza (Argentina)", subtitle= "Anio 2019", x= "Mes", y= "Hielo marino (%)")
+
+#Solo 2019 para Davis.
+datos_davis_periodo$anio <- year(datos_davis_periodo$time)
+grafico <- ggplot(data= datos_davis_periodo[anio==2019], mapping= aes(x=time, y=icec)) +
+  geom_bar(stat="identity", fill="#8aeebd") +
+  labs(title= "Variación anual de la concentración del hielo marino Base Davis (Australia)", subtitle= "Anio 2019", x= "Mes", y= "Hielo marino (%)")
+
 
 
 #Almaceno la info en una tabla .
@@ -71,10 +81,9 @@ tabla_esperanza$lon <- NULL
 
 "Base Esperanza, Latitud -63.8079, Longitud 303.75"
 
-colnames(tabla_esperanza) <- c("Tiempo", "Concentracion")
+colnames(tabla_esperanza) <- c("Base Esperanza", "Latitud -63.8079, Longitud 303.75")
 
-header <- c("Base Esperanza", "Latitud -63.8079, Longitud 303.75")
-names(tabla_esperanza) <- header
+tabla_esperanza$Info[1] <- c("Base Esperanza")
 
 write.csv(tabla_esperanza, file= "datos_esperanza.txt", sep="  ", row.names = F)
 
@@ -86,7 +95,7 @@ colnames(tabla_davis) <- c("Latitud", "Longitud", "Concentracion")
 
 write.table(tabla_davis, file= "datos_davis.txt", sep="  ", row.names = F)
 ### ponerlo como titulo.
-#agregar fecha
+
 
 
 
@@ -100,7 +109,7 @@ climatologia <- aggregate(datos_antartida_periodo$icec, list(datos_antartida_per
 
 colnames(climatologia) <- c("Mes", "Latitud", "Longitud", "Climatologia")
 
-#Separo los datos de cada mes
+#Separo los datos de cada mes. VER DE HACER UN CICLO CON ESTO
 enero <- subset.data.frame(climatologia, Mes== 1, select=c(Latitud, Longitud, Climatologia))
 febrero <- subset.data.frame(climatologia, Mes== 2, select=c(Latitud, Longitud, Climatologia))
 marzo <- subset.data.frame(climatologia, Mes== 3, select=c(Latitud, Longitud, Climatologia))
@@ -263,19 +272,78 @@ g <- g+coord_map(projection = proy,orientation=orientacion, ylim = c(-40, -90))
 
 # ITEM E - CORRELACION CON INDICE SOI -------------------------------------
 
+datos_soi <- read.table(file= "soi.txt", skip= 43, nrows = 30) #Abro el archivo y recorto los datos del periodo que necesito: 1990-2019.
+colnames(datos_soi) <- c("Anio","Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
+
+#Defino una funcion que haga el promedio por estaciones y por anio
+
+promedio_estacional_soi <- function(estacion) {
+  promedios <- data.frame()
+  if (estacion == "MAM") {
+    a <- subset.data.frame(datos_soi, select=c(Anio, Mar, Abr, May))
+  } else if (estacion == "JJA") {
+    a <- subset.data.frame(datos_soi, select=c(Anio, Jun, Jul, Ago))
+  } else if (estacion == "SON") {
+    a <- subset.data.frame(datos_soi, select=c(Anio, Sep, Oct, Nov))
+  } else if (estacion == "DEF") { #VER ESTO, OJO QUE TOMA LOS DEL MISMO AÑO!!!
+    a <- subset.data.frame(datos_soi, select=c(Anio, Dic, Ene, Feb))
+    }
+  for (i in 1:nrow(a)) {
+    valores <- c(a[i,2], a[i,3], a[i,4])
+    promedios[i,1]<- a$Anio[i]
+    promedios[i,2] <- mean(valores)
+    
+  }
+  return(promedios)
+}
+
+#Uso la funcion para cada estacion
+MAM_soi <- promedio_estacional_soi("MAM")
+colnames(MAM_soi) <- c("Anio","PromEstacion")
+JJA_soi <- promedio_estacional_soi("JJA")
+colnames(JJA_soi) <- c("Anio","PromEstacion")
+SON_soi <- promedio_estacional_soi("SON")
+colnames(SON_soi) <- c("Anio","PromEstacion")
+DEF_soi <- promedio_estacional_soi("DEF")
+colnames(DEF_soi) <- c("Anio","PromEstacion")
 
 
-# Ejemplo de datos
-x <- c(1, 2, 3, 4, 5)
-y <- c(2, 4, 5, 4, 5)
 
-# Calcular la correlación lineal
-correlation <- cor(x, y)
+#Hago promedio estacional para la Base Esperanza
+datos_esperanza_periodo$mes <- month(datos_esperanza_periodo$time)
+datos_esperanza_periodo$anio <- year(datos_esperanza_periodo$time)
 
-# Imprimir el resultado
-print(correlation)
+#MAM
+mam <- sort(c(which(datos_esperanza_periodo$mes==3), which(datos_esperanza_periodo$mes==4),which(datos_esperanza_periodo$mes==5))) #posiciones de los meses 3,4 y 5
+esperanza_mam <- aggregate(datos_esperanza_periodo$icec[mam], list(datos_esperanza_periodo$anio[mam]), mean)
+
+#JJA (misma idea que antes)
+jja <- sort(c(which(datos_esperanza_periodo$mes==6), which(datos_esperanza_periodo$mes==7),which(datos_esperanza_periodo$mes==8))) 
+esperanza_jja <- aggregate(datos_esperanza_periodo$icec[jja], list(datos_esperanza_periodo$anio[jja]), mean)
+
+#SON
+son <-sort(c(which(datos_esperanza_periodo$mes==9), which(datos_esperanza_periodo$mes==10),which(datos_esperanza_periodo$mes==11))) 
+esperanza_son <- aggregate(datos_esperanza_periodo$icec[son], list(datos_esperanza_periodo$anio[son]), mean)
+
+#DEF
+esperanza_def 
 
 
+#Hago las correlaciones
+cor_verano_esp <- 
+cor_otonio_esp <- cor(MAM_soi[,2], esperanza_mam[,2])
+cor_invierno_esp <- cor(JJA_soi[,2], esperanza_jja[,2])
+cor_primavera_esp <-cor(SON_soi[,2], esperanza_son[,2])
+  
+#Armo un dataframe con esa info y lo guardo en formato txt.
+season <- c("DEF", "MAM", "JJA","SON")
+cor_esp <- c(cor_verano_esp, cor_otonio_esp, cor_invierno_esp, cor_primavera_esp)
+correlacion_esperanza <- data.frame("Season"= season, "Coeficiente de correlacion SOI/Concentracion hielo marino Esperanza" = cor)
+write.table(correlacion_esperanza, file= "correlacion_soi_hielo.txt", sep="  ", row.names = F)
+
+
+
+#Idem a lo anterior pero con la base Davis
 
 
 
