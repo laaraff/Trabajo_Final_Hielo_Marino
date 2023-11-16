@@ -285,7 +285,7 @@ promedio_estacional_soi <- function(estacion) {
     a <- subset.data.frame(datos_soi, select=c(Anio, Jun, Jul, Ago))
   } else if (estacion == "SON") {
     a <- subset.data.frame(datos_soi, select=c(Anio, Sep, Oct, Nov))
-  } else if (estacion == "DEF") { #VER ESTO, OJO QUE TOMA LOS DEL MISMO AÑO!!!
+  } else if (estacion == "DEF") { #VER ESTO, OJO QUE TOMA LOS DEL MISMO AÑO!!! 
     a <- subset.data.frame(datos_soi, select=c(Anio, Dic, Ene, Feb))
     }
   for (i in 1:nrow(a)) {
@@ -296,6 +296,11 @@ promedio_estacional_soi <- function(estacion) {
   }
   return(promedios)
 }
+
+#VER ESTO, OJO QUE TOMA LOS DEL MISMO AÑO!!! 
+#puedo recortar e y f de un anio y diciembre del anio anterior (anio -1) y luego unir los data frame
+#y hacer el promedio de data_frame
+
 
 #Uso la funcion para cada estacion
 MAM_soi <- promedio_estacional_soi("MAM")
