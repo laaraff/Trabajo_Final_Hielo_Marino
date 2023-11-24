@@ -1,0 +1,5 @@
+"Season"  "Coeficiente.de.correlacion.SOI.Concentracion.hielo.marino.Base.Davis"
+"DEF"  0.0224292040150924
+"MAM"  -0.335132262881844
+"JJA"  -0.159053717364795
+"SON"  -0.479993092230941
