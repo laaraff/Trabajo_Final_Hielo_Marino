@@ -1,0 +1,5 @@
+"Season"  "Coeficiente.de.correlacion.SOI.Concentracion.hielo.marino.Base.Esperanza"
+"DEF"  -0.111945137683336
+"MAM"  -0.12075791805427
+"JJA"  -0.0154321483714412
+"SON"  -0.24888793320032
