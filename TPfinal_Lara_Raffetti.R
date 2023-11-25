@@ -76,10 +76,8 @@ grafico <- ggplot(data= datos_davis_periodo[anio==2019], mapping= aes(x=time, y=
 #Almaceno la info en una tabla .
 tabla_esperanza <- datos_esperanza_periodo
 
-tabla_esperanza$lat <- NULL  #PONER ESTO EN UN SOLO RENGLON COMO ME DIJO ROCIO MAS ABAJO
+tabla_esperanza$lat <- NULL  
 tabla_esperanza$lon <- NULL
-#tabla_esperanza$anio <- NULL
-#tabla_esperanza$mes <- NULL
 
 #"Base Esperanza, Latitud -63.8079, Longitud 303.75"
 write("Base Esperanza, Antaŕtida Argentina. 63°23′54″S 56°59′46″O
@@ -95,8 +93,6 @@ write.table(tabla_esperanza, file= "datos_esperanza.txt", sep="  ", row.names = 
 tabla_davis <- datos_davis_periodo
 tabla_davis$lat <- NULL
 tabla_davis$lon <- NULL
-#tabla_davis$anio <- NULL
-#tabla_davis$mes <- NULL
 
 write("Base Davis (Australia), 68°28′09″S 78°52′11″E
       
