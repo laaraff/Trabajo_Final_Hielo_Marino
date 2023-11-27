@@ -1,4 +1,5 @@
 #Trabajo Final Laboratorio de Procesamiento de Información Meteorológica 2c2023 - DCAO UBA
+
 #Análisis de la concentración de hielo marino en océanos circundantes a la Antártida - 
 #Base Esperanza (Argentina) y Base Davis (Australia)
 
@@ -20,7 +21,6 @@ library(ggplot2)
 archivo <- "C:/Users/Usuario/Documents/Lara/Trabajo_Final_Hielo_Marino/icec.sfc.mon.mean.nc" #Ojo cambio nombre carpeta
 GlanceNetCDF(archivo)
 datos <- ReadNetCDF(archivo, vars = "icec")
-
 
 
 # ITEM B - Selecciono Antártida período 1990-2019 ---------------
@@ -73,13 +73,13 @@ grafico <- ggplot(data= datos_davis_periodo[anio==2019], mapping= aes(x=time, y=
 
 
 
-#Almaceno la info en una tabla .
+#Almaceno la info en una tabla. Primero escribo el encabezado y luego le agrego los datos al mismo archivo.
+#Base Esperanza
 tabla_esperanza <- datos_esperanza_periodo
 
 tabla_esperanza$lat <- NULL  
 tabla_esperanza$lon <- NULL
 
-#"Base Esperanza, Latitud -63.8079, Longitud 303.75"
 write("Base Esperanza, Antaŕtida Argentina. 63°23′54″S 56°59′46″O
 
       ---------
@@ -131,7 +131,7 @@ geom_tile(aes(fill=Climatologia),alpha=0.6) +
   labs(x="Longitud", y= "Latitud", fill= "Climatologia Mensual")+theme(axis.text.x=element_text(size=5)) +
   labs(title="Concentración de hielo marino Antártida y Océanos circundantes", subtitle = ("Promedio Mensual 1990-2019"))
 
-#Separo los datos de dos meses para hacer graficos aparte y poder compararlos y verlos mejor en la presentacion
+#Separo los datos de dos meses cualquiera para hacer mapas aparte y poder compararlos y verlos mejor en la presentacion
 febrero <- subset.data.frame(climatologia, Mes== 2, select=c(Latitud, Longitud, Climatologia))
 septiembre <- subset.data.frame(climatologia, Mes== 9, select=c(Latitud, Longitud, Climatologia))
 
@@ -246,7 +246,7 @@ esperanza_def <- aggregate(datos_esperanza_periodo2$icec[def], list(datos_espera
 
 
 #Hago las correlaciones
-cor_verano_esp <- cor(DEF_soi[,2], esperanza_def[,2]) #Agrego el na.rm porque en los veranos no tengo datos de 1990, entonces hay un NA
+cor_verano_esp <- cor(DEF_soi[,2], esperanza_def[,2]) 
 cor_otonio_esp <- cor(MAM_soi[,2], esperanza_mam[,2])
 cor_invierno_esp <- cor(JJA_soi[,2], esperanza_jja[,2])
 cor_primavera_esp <-cor(SON_soi[,2], esperanza_son[,2])
