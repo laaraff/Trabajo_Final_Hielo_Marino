@@ -17,8 +17,7 @@ library(lubridate)
 library(ggplot2)
 
 
-# WINDOWS archivo <- "C:/Users/Usuario/Documents/Lara/Trabajo_Final_Hielo_Marino/icec.sfc.mon.mean.nc"
-archivo <- "C:/Users/Usuario/Documents/Lara/Trabajo_Final_Hielo_Marino/icec.sfc.mon.mean.nc" #Ojo cambio nombre carpeta
+archivo <- "C:/Users/Usuario/Documents/Lara/Trabajo_Final_Hielo_Marino/icec.sfc.mon.mean.nc" 
 GlanceNetCDF(archivo)
 datos <- ReadNetCDF(archivo, vars = "icec")
 
@@ -26,12 +25,12 @@ datos <- ReadNetCDF(archivo, vars = "icec")
 # ITEM B - Selecciono Antártida período 1990-2019 ---------------
 
 antartida <- ReadNetCDF(archivo, vars = "icec",
-                        subset = list(lat = c(-60,-88), #va hasta -88
+                        subset = list(lat = c(-60,-88), #los datos llegan hasta -88
                                       lon = c(0,358))) 
 
 datos_antartida_periodo<- antartida[which(year(antartida$time) %in% 1990:2019),]
 
-# ITEM C - Selecciono las bases de interés. Serie temporal ----------------
+# ITEM C - Selecciono las bases de interés. Series temporales ----------------
 
 datos_esperanza_totales<- ReadNetCDF(archivo, vars = "icec",
                           subset = list(lat = c(-63.396958),
@@ -48,7 +47,7 @@ head(datos_esperanza_periodo)
 datos_davis_periodo <- datos_davis_totales[which(year(datos_davis_totales$time) %in% 1990:2019),]
 
 
-#Pruebo con barras. Esperanza
+#Hago las series temporales para cada base con gráficos de barras. Intenté hacerlo con lineas pero como hay muchos 0 y 1 no se ve bien.
 grafico <- ggplot(data= datos_esperanza_periodo, mapping= aes(x=time, y=icec)) +
   geom_bar(stat="identity", fill="#acd8fa") +
   labs(title= "Variación de la concentración del hielo marino Base Esperanza (Argentina)", subtitle= "Periodo 1990-2019", x= "Mes", y= "Hielo marino (%)")
@@ -59,13 +58,13 @@ grafico1 <- ggplot(data= datos_davis_periodo, mapping= aes(x=time, y=icec)) +
   labs(title= "Variación de la concentración del hielo marino Base Davis (Australia)", subtitle= "Periodo 1990-2019", x= "Mes", y= "Hielo marino (%)")
 
 
-#Hago una serie con un solo anio. Esperanza
+#Hago una serie temportal con un solo anio para ver mejor el ciclo anual. Base Esperanza, anio 2019:
 datos_esperanza_periodo$anio <- year(datos_esperanza_periodo$time)
 grafico <- ggplot(data= datos_esperanza_periodo[anio==2019], mapping= aes(x=time, y=icec)) +
   geom_bar(stat="identity", fill="#bfacfa") +
   labs(title= "Variación anual de la concentración del hielo marino Base Esperanza (Argentina)", subtitle= "Anio 2019", x= "Mes", y= "Hielo marino (%)")
 
-#Solo 2019 para Davis.
+#Idem para Davis.
 datos_davis_periodo$anio <- year(datos_davis_periodo$time)
 grafico <- ggplot(data= datos_davis_periodo[anio==2019], mapping= aes(x=time, y=icec)) +
   geom_bar(stat="identity", fill="#8aeebd") +
@@ -73,12 +72,13 @@ grafico <- ggplot(data= datos_davis_periodo[anio==2019], mapping= aes(x=time, y=
 
 
 
-#Almaceno la info en una tabla. Primero escribo el encabezado y luego le agrego los datos al mismo archivo.
+#Almaceno la info pedida en una tabla. Primero escribo el encabezado y luego le agrego los datos al mismo archivo.
 #Base Esperanza
 tabla_esperanza <- datos_esperanza_periodo
 
 tabla_esperanza$lat <- NULL  
 tabla_esperanza$lon <- NULL
+tabla_esperanza$anio <- NULL
 
 write("Base Esperanza, Antaŕtida Argentina. 63°23′54″S 56°59′46″O
 
@@ -93,6 +93,7 @@ write.table(tabla_esperanza, file= "datos_esperanza.txt", sep="  ", row.names = 
 tabla_davis <- datos_davis_periodo
 tabla_davis$lat <- NULL
 tabla_davis$lon <- NULL
+tabla_davis$anio <- NULL
 
 write("Base Davis (Australia), 68°28′09″S 78°52′11″E
       
@@ -114,7 +115,7 @@ climatologia <- aggregate(datos_antartida_periodo$icec, list(datos_antartida_per
 
 colnames(climatologia) <- c("Mes", "Latitud", "Longitud", "Climatologia")
 
-#Grafico un panel con los 12 mapas
+#Grafico un panel con los 12 mapas con proyección polar.
 mapa <- map_data("world")
 library(RColorBrewer)
 proy<-"stereographic"
@@ -165,7 +166,7 @@ g <- g+coord_map(projection = proy,orientation=orientacion, ylim = c(-40, -90))
 datos_soi <- read.table(file= "soi.txt", skip= 43, nrows = 30) #Abro el archivo y recorto los datos del periodo que necesito: 1990-2019.
 colnames(datos_soi) <- c("Anio","Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
 
-#Defino una funcion que haga el promedio por estaciones y por anio
+#Defino una funcion que haga el promedio por estaciones y por anio. Hago una función aparte para la estacion diciembre-enero-febrero
 
 promedio_estacional_soi <- function(estacion) {
   promedios <- data.frame()
@@ -281,7 +282,7 @@ datos_davis_periodo1 <- datos_davis_periodo1[-349,]#y borro dicimebre de 2019 qu
 davis_def <- aggregate(datos_davis_periodo1$icec[def], list(datos_davis_periodo1$anio[def]), mean)
 
 #Hago las correlaciones, guardo la info en un dataframe y lo guardo en un archivo .txt
-cor_verano_dav <- cor(DEF_soi[,2], davis_def[,2]) #Agrego el na.rm porque en los veranos no tengo datos de 1990, entonces hay un NA
+cor_verano_dav <- cor(DEF_soi[,2], davis_def[,2]) 
 cor_otonio_dav <- cor(MAM_soi[,2], davis_mam[,2])
 cor_invierno_dav <- cor(JJA_soi[,2], davis_jja[,2])
 cor_primavera_dav <-cor(SON_soi[,2], davis_son[,2])
@@ -297,7 +298,7 @@ write.table(correlacion_davis, file= "correlacion_soi_hielo_davis.txt", sep="  "
 
 #------------------------------------------------------
 #EXTRA
-#Hago un mapa para mostrar donde estan las bases con las que estoy trabajando. 
+#Hago un mapa para mostrar donde estan las bases antárticas con las que estoy trabajando. 
 coordenadas <- data.frame(
   latitud = c(-63.8079, -68.46),
   longitud = c(-56.99, 78.86)
