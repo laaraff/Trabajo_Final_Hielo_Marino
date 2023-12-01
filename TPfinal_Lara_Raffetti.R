@@ -312,8 +312,8 @@ color= c("#FE006C", "#FE006C")
 
 mapa_estaciones <- ggplot() +
   geom_polygon(data = data.frame(long = c(-180, 180, 180, -180), lat = c(-84, -84, 0, 0)), aes(x = long, y = lat), fill = "#acd8fa") + #fondo
-  geom_polygon(data = south_america_map, aes(x = long, y = lat, group = group), fill = "#E9F0F0", color = "black") +
-  geom_polygon(data = antarctica_map, aes(x = long, y = lat, group = group), fill = "#E9F0F0", color = "black") +
+  geom_polygon(data = south_america_map, aes(x = long, y = lat, group = group), fill = "#FFFFFF", color = "black") +
+  geom_polygon(data = antarctica_map, aes(x = long, y = lat, group = group), fill = "#FFFFFF", color = "black") +
   geom_point(data = coordenadas, aes(x = longitud, y = latitud, color = color), size = 3) +
   geom_text(data = coordenadas, aes(x = longitud, y = latitud, label = etiquetas), vjust = -2, nudge_y = 0.5, size = 4.5, fontface = c("bold")) +
   coord_cartesian(xlim = c(-100, 100), ylim = c(-84, -40)) +
@@ -331,7 +331,7 @@ orientacion<-c(-90,0,0)
 
 
 ggplot() +
-  geom_polygon(data = mapa, aes(x = long, y = lat, group = group), fill = "#E9F0F0", color = "black") + #pinto los continentes
+  geom_polygon(data = mapa, aes(x = long, y = lat, group = group), fill = "#FFFFFF", color = "black") + #pinto los continentes
   geom_point(data = coordenadas, aes(x = longitud, y = latitud, color = "red"), size = 3, shape= 15) +
   geom_text(
     data = coordenadas,
